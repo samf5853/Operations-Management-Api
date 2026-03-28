@@ -7,4 +7,10 @@ public interface IInventoryRepository
     Task<List<InventoryItem>> GetAllAsync();
     
     Task<InventoryItem> CreateAsync(InventoryItem item);
+    
+    Task<InventoryItem?> GetByIdAsync(int id);
+    
+    Task<InventoryItem> UpdateAsync(InventoryItem item);
+    
+    Task<bool> DeleteAsync(int id);
 }

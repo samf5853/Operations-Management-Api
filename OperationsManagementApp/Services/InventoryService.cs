@@ -30,4 +30,29 @@ public class InventoryService : IInventoryService
     {
         return await _repository.CreateAsync(item);
     }
+
+    public async Task<InventoryItem> UpdateItemAsync(int id, InventoryItem updatedItem)
+    {
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null)
+            return null;
+        
+        // Business logic to update the item
+        if (updatedItem.Quantity < 0)
+        {
+            throw new Exception("Quantity cannot be negative");
+        }
+        
+        existing.Name = updatedItem.Name;
+        existing.SKU = updatedItem.SKU;
+        existing.Quantity = updatedItem.Quantity;
+        existing.Cost = updatedItem.Cost;
+        
+        return await _repository.UpdateAsync(existing);
+    }
+
+    public async Task<bool> DeleteItemAsync(int id)
+    {
+        return await _repository.DeleteAsync(id);
+    }
 }
