@@ -7,5 +7,5 @@ public class Order
     public string Status { get; set; }
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     public int CreatedBy { get; set; }
-    public List<OrderItem> OrderItems { get; set; }
+    public List<OrderItem> Items { get; set; }
 }

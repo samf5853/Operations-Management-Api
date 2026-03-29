@@ -52,4 +52,11 @@ public class InventoryRepository : IInventoryRepository
         
         return true;
     }
+
+    public async Task<List<InventoryItem>> GetByIdsAsync(List<int> ids)
+    {
+        return await _context.InventoryItems.Where(item => ids.Contains(item.Id)).ToListAsync();
+
+    }
+
 }

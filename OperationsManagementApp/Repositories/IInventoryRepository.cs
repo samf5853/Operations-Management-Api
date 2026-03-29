@@ -13,4 +13,6 @@ public interface IInventoryRepository
     Task<InventoryItem> UpdateAsync(InventoryItem item);
     
     Task<bool> DeleteAsync(int id);
+
+    Task<List<InventoryItem>> GetByIdsAsync(List<int> ids);
 }
