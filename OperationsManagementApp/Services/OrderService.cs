@@ -21,6 +21,7 @@ public class OrderService : IOrderService
 
         var inventoryItems = await _repository.GetByIdsAsync(ids);
 
+        // Validate everything BEFORE making any changes
         foreach (var requestItem in request.Items)
         {
             var inventoryItem = inventoryItems
@@ -31,16 +32,22 @@ public class OrderService : IOrderService
                 throw new Exception($"Item with ID {requestItem.InventoryItemId} not found");
             }
 
+            if (requestItem.Quantity <= 0)
+            {
+                throw new Exception($"Quantity must be greater than zero");
+            }
+
             if (requestItem.Quantity > inventoryItem.Quantity)
             {
                 throw new Exception(
-                    $"Not enough stock for {inventoryItem.Name}. Available: {inventoryItem.Quantity}"
+                    $"Not enough stock for {inventoryItem.Name}. " +
+                    $"Requested: {requestItem.Quantity}, Available: {inventoryItem.Quantity}"
                 );
             }
             
-            inventoryItem.Quantity -= requestItem.Quantity;
         }
 
+        // All validation passed - now build the order
         var order = new Order
         {
             CustomerName = request.CustomerName,
@@ -49,15 +56,29 @@ public class OrderService : IOrderService
             Items = []
         };
 
+        decimal total = 0;
+
         foreach (var requestItem in request.Items)
         {
+            var inventoryItem = inventoryItems
+                .First(i => i.Id == requestItem.InventoryItemId);
+            
+            // Deduct stock
+            inventoryItem.Quantity -= requestItem.Quantity;
+            
+            // Calculate line price
+            var linePrice = inventoryItem.Cost * requestItem.Quantity;
+            total += linePrice;
+            
             order.Items.Add(new OrderItem
             {
                 InventoryItemId = requestItem.InventoryItemId,
                 Quantity = requestItem.Quantity,
-                Price = 0 // Placeholder
+                Price = inventoryItem.Cost //unit price at time of order
             });
         }
+        
+        order.TotalAmount = total;
         
         await _orderRepository.CreateOrderAsync(order);
         
